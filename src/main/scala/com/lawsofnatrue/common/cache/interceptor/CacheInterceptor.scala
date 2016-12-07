@@ -7,6 +7,7 @@ import com.lawsofnatrue.common.cache.anno.{CacheKey, CacheValue, ServiceCache}
 import com.lawsofnatrue.common.cache.enumeration.CacheMethod
 import com.lawsofnature.common.redis.RedisClientTemplate
 import org.aopalliance.intercept.{MethodInterceptor, MethodInvocation}
+import org.slf4j.{Logger, LoggerFactory}
 
 /**
   * Created by fangzhongwei on 2016/12/7.
@@ -16,6 +17,7 @@ trait CacheInterceptor extends MethodInterceptor {
 }
 
 class CacheInterceptorImpl @Inject()(redisClientTemplate: RedisClientTemplate) extends CacheInterceptor {
+  val logger: Logger = LoggerFactory.getLogger(getClass)
   // CacheMethod, keyDir, keyParamIndex, valueParamIndex, expireSeconds
   var methodMap: scala.collection.mutable.Map[Method, (CacheMethod, String, Int, Class[_], Int)] = scala.collection.mutable.Map[Method, (CacheMethod, String, Int, Class[_], Int)]()
 
@@ -37,10 +39,13 @@ class CacheInterceptorImpl @Inject()(redisClientTemplate: RedisClientTemplate) e
     cacheMethod match {
       case CacheMethod.SELECT =>
         redisClientTemplate.get(key, entityClass) match {
-          case Some(result) => result.asInstanceOf[AnyRef]
+          case Some(result) =>
+            logger.info(s"found int cache key:$key, value:$result")
+            result.asInstanceOf[AnyRef]
           case None =>
+            logger.info(s"not found int cache key:$key")
             val proceedResult: AnyRef = methodInvocation.proceed()
-            if (proceedResult.getClass.eq(entityClass)) {
+            if (proceedResult != null && proceedResult.getClass.eq(entityClass)) {
               redisClientTemplate.set(key, proceedResult, expireSeconds)
             }
             proceedResult
