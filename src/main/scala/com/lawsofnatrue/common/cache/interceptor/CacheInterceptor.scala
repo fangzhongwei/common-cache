@@ -65,10 +65,12 @@ class CacheInterceptorImpl(redisClientTemplate: RedisClientTemplate) extends Cac
     val parameters: Array[Parameter] = method.getParameters
     val entityType: Class[_] = method.getReturnType
 
-    var keyParamIndex = -1
-    keyParamIndex = parameters.zipWithIndex.filter(
-      _._1.getAnnotation[CacheKey](classOf[CacheKey]) != null
-    ).head._2
+    val keyParamIndex = parameters.length match {
+      case 1 => 0
+      case _ => parameters.zipWithIndex.filter(
+        _._1.getAnnotation[CacheKey](classOf[CacheKey]) != null
+      ).head._2
+    }
 
     methodMap += (method -> (cacheMethod, keyDir, keyParamIndex, entityType, expireSeconds))
     (cacheMethod, keyDir, keyParamIndex, entityType, expireSeconds)
