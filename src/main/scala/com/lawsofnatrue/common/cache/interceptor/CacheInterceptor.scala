@@ -1,9 +1,8 @@
 package com.lawsofnatrue.common.cache.interceptor
 
 import java.lang.reflect.{Method, Parameter}
-import javax.inject.Inject
 
-import com.lawsofnatrue.common.cache.anno.{CacheKey, CacheValue, ServiceCache}
+import com.lawsofnatrue.common.cache.anno.{CacheKey, ServiceCache}
 import com.lawsofnatrue.common.cache.enumeration.CacheMethod
 import com.lawsofnature.common.redis.RedisClientTemplate
 import org.aopalliance.intercept.{MethodInterceptor, MethodInvocation}
@@ -16,10 +15,12 @@ trait CacheInterceptor extends MethodInterceptor {
 
 }
 
-class CacheInterceptorImpl @Inject()(redisClientTemplate: RedisClientTemplate) extends CacheInterceptor {
+class CacheInterceptorImpl(redisClientTemplate: RedisClientTemplate) extends CacheInterceptor {
   val logger: Logger = LoggerFactory.getLogger(getClass)
   // CacheMethod, keyDir, keyParamIndex, valueParamIndex, expireSeconds
   var methodMap: scala.collection.mutable.Map[Method, (CacheMethod, String, Int, Class[_], Int)] = scala.collection.mutable.Map[Method, (CacheMethod, String, Int, Class[_], Int)]()
+
+  def apply(redisClientTemplate: RedisClientTemplate): CacheInterceptorImpl = new CacheInterceptorImpl(redisClientTemplate)
 
   override def invoke(methodInvocation: MethodInvocation): AnyRef = {
     val method: Method = methodInvocation.getMethod
