@@ -67,14 +67,10 @@ class CacheInterceptorImpl @Inject()(redisClientTemplate: RedisClientTemplate) e
     val entityType: Class[_] = method.getReturnType
 
     var keyParamIndex = -1
-    var parameter: Parameter = null
-    for (i <- 0 to parameters.length - 1) {
-      parameter = parameters(i)
-      parameter.getAnnotation[CacheKey](classOf[CacheKey]) == null match {
-        case false => keyParamIndex = i
-        case _ =>
-      }
-    }
+    keyParamIndex = parameters.zipWithIndex.filter(
+      _._1.getAnnotation[CacheKey](classOf[CacheKey]) != null
+    ).head._2
+
     methodMap += (method -> (cacheMethod, keyDir, keyParamIndex, entityType, expireSeconds))
     (cacheMethod, keyDir, keyParamIndex, entityType, expireSeconds)
   }
