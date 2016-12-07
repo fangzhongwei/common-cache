@@ -41,10 +41,8 @@ class CacheInterceptorImpl(redisClientTemplate: RedisClientTemplate) extends Cac
       case CacheMethod.SELECT =>
         redisClientTemplate.get(key, entityClass) match {
           case Some(result) =>
-            logger.info(s"found int cache key:$key, value:$result")
             result.asInstanceOf[AnyRef]
           case None =>
-            logger.info(s"not found int cache key:$key")
             val proceedResult: AnyRef = methodInvocation.proceed()
             if (proceedResult != null && proceedResult.getClass.eq(entityClass)) {
               redisClientTemplate.set(key, proceedResult, expireSeconds)
