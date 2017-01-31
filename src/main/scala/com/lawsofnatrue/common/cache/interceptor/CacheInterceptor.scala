@@ -52,11 +52,17 @@ class CacheInterceptorImpl(redisClientTemplate: RedisClientTemplate) extends Cac
               throw new RuntimeException(s"type does not config : $clazzEncryptedData")
             }
           case None =>
-            val proceedResult: GeneratedMessage = methodInvocation.proceed().asInstanceOf[GeneratedMessage]
-            if (proceedResult != null && proceedResult.getClass.eq(entityClass)) {
-              redisClientTemplate.setBytes(key.getBytes(StandardCharsets.UTF_8), proceedResult.toByteArray, expireSeconds)
+            val proceed: AnyRef = methodInvocation.proceed()
+            proceed == null match {
+              case true =>
+                proceed
+              case false =>
+                val proceedResult: GeneratedMessage = proceed.asInstanceOf[GeneratedMessage]
+                if (proceedResult != null && proceedResult.getClass.eq(entityClass)) {
+                  redisClientTemplate.setBytes(key.getBytes(StandardCharsets.UTF_8), proceedResult.toByteArray, expireSeconds)
+                }
+                proceedResult
             }
-            proceedResult
         }
       case CacheMethod.DELETE =>
         redisClientTemplate.deleteBytes(key.getBytes(StandardCharsets.UTF_8))
