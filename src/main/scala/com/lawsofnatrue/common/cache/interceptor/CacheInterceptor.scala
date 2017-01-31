@@ -1,10 +1,13 @@
 package com.lawsofnatrue.common.cache.interceptor
 
 import java.lang.reflect.{Method, Parameter}
+import java.nio.charset.StandardCharsets
 
+import com.jxjxgo.edcenter.domain.cache.encrypteddata.EncryptedData
 import com.lawsofnatrue.common.cache.anno.{CacheKey, ServiceCache}
 import com.lawsofnatrue.common.cache.enumeration.CacheMethod
 import com.lawsofnature.common.redis.RedisClientTemplate
+import com.trueaccord.scalapb.GeneratedMessage
 import org.aopalliance.intercept.{MethodInterceptor, MethodInvocation}
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -39,18 +42,24 @@ class CacheInterceptorImpl(redisClientTemplate: RedisClientTemplate) extends Cac
 
     cacheMethod match {
       case CacheMethod.SELECT =>
-        redisClientTemplate.get(key, entityClass) match {
-          case Some(result) =>
-            result.asInstanceOf[AnyRef]
+
+        redisClientTemplate.getBytes(key.getBytes(StandardCharsets.UTF_8)) match {
+          case Some(bytes) =>
+            val clazzEncryptedData: Class[EncryptedData] = classOf[EncryptedData]
+            if (entityClass.getPackage.equals(clazzEncryptedData.getPackage) && entityClass.getName.equals(clazzEncryptedData.getName)) {
+              EncryptedData.parseFrom(bytes)
+            } else {
+              throw new RuntimeException(s"type does not config : $clazzEncryptedData")
+            }
           case None =>
-            val proceedResult: AnyRef = methodInvocation.proceed()
+            val proceedResult: GeneratedMessage = methodInvocation.proceed().asInstanceOf[GeneratedMessage]
             if (proceedResult != null && proceedResult.getClass.eq(entityClass)) {
-              redisClientTemplate.set(key, proceedResult, expireSeconds)
+              redisClientTemplate.setBytes(key.getBytes(StandardCharsets.UTF_8), proceedResult.toByteArray, expireSeconds)
             }
             proceedResult
         }
       case CacheMethod.DELETE =>
-        redisClientTemplate.delete(key)
+        redisClientTemplate.deleteBytes(key.getBytes(StandardCharsets.UTF_8))
         methodInvocation.proceed()
       case _ => methodInvocation.proceed()
     }
