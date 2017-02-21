@@ -1,4 +1,4 @@
-package com.lawsofnatrue.common.cache.enumeration;
+package com.jxjxgo.common.cache.enumeration;
 
 /**
  * Created by fangzhongwei on 2016/12/7.

@@ -1,6 +1,6 @@
-package com.lawsofnatrue.common.cache.anno;
+package com.jxjxgo.common.cache.anno;
 
-import com.lawsofnatrue.common.cache.enumeration.CacheMethod;
+import com.jxjxgo.common.cache.enumeration.CacheMethod;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

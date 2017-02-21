@@ -1,4 +1,4 @@
-package com.lawsofnatrue.common.cache.anno;
+package com.jxjxgo.common.cache.anno;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

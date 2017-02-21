@@ -1,12 +1,13 @@
-package com.lawsofnatrue.common.cache.interceptor
+package com.jxjxgo.common.cache.interceptor
 
 import java.lang.reflect.{Method, Parameter}
 import java.nio.charset.StandardCharsets
 
+import com.jxjxgo.common.cache.anno.{CacheKey, ServiceCache}
+import com.jxjxgo.common.cache.enumeration.CacheMethod
 import com.jxjxgo.edcenter.domain.cache.encrypteddata.EncryptedData
-import com.lawsofnatrue.common.cache.anno.{CacheKey, ServiceCache}
-import com.lawsofnatrue.common.cache.enumeration.CacheMethod
-import com.lawsofnature.common.redis.RedisClientTemplate
+import com.jxjxgo.common.cache.anno.ServiceCache
+import com.jxjxgo.common.redis.RedisClientTemplate
 import com.trueaccord.scalapb.GeneratedMessage
 import org.aopalliance.intercept.{MethodInterceptor, MethodInvocation}
 import org.slf4j.{Logger, LoggerFactory}
