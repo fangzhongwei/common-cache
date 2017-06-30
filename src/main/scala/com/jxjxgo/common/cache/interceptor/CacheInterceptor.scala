@@ -62,7 +62,7 @@ class CacheInterceptorImpl(redisClientTemplate: RedisClientTemplate) extends Cac
                 if (proceedResult != null && proceedResult.getClass.eq(entityClass)) {
                   redisClientTemplate.setBytes(key.getBytes(StandardCharsets.UTF_8), proceedResult.toByteArray, expireSeconds)
                 }
-                proceedResult
+                proceedResult.asInstanceOf[AnyRef]
             }
         }
       case CacheMethod.DELETE =>
